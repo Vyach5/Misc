@@ -9,6 +9,19 @@ docker-compose --version
 
 .yml --
 
+1
+
+version: “3
+services:
+networks:
+netology-lesson:
+driver: bridge
+ipam:
+config:
+- subnet: 172.19.0.0/24
+
+2
+
 netology-db:
 image: postgres:latest # Образ, который мы будем использовать
 container_name: netology-db # Имя, которым будет называться наш контейнер
@@ -25,6 +38,8 @@ networks:
 netology-lesson:
 ipv4_address: 172.19.0.2
 restart: always # Режим перезапуска контейнера. Контейнер всегда будет перезапускаться
+
+3
 
 pgadmin:
 image: dpage/pgadmin4
