@@ -4,3 +4,24 @@ sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-
 sudo chmod +x /usr/local/bin/docker-compose
 3. Проверяем, что всё работает:
 docker-compose --version
+
+
+
+
+netology-db:
+image: postgres:latest # Образ, который мы будем использовать
+container_name: netology-db # Имя, которым будет называться наш контейнер
+ports: # Порты, которые мы пробрасываем с нашего докер сервера внутрь контейнера
+- 5432:5432
+volumes: # Папка, которую мы пробросим с докер сервера внутрь контейнера
+- ./pg_data:/var/lib/postgresql/data/pgdata
+environment: # Переменные среды
+POSTGRES_PASSWORD: 123 # Задаём пароль от пользователя postgres
+POSTGRES_DB: netology_db # БД которая сразу же будет создана
+PGDATA: /var/lib/postgresql/data/pgdata # Путь внутри контейнера, где будет папка
+pgdata
+networks:
+netology-lesson:
+ipv4_address: 172.19.0.2
+restart: always # Режим перезапуска контейнера. Контейнер всегда будет
+перезапускаться
