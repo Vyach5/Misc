@@ -7,6 +7,7 @@ docker-compose --version
 
 
 
+.yml --
 
 netology-db:
 image: postgres:latest # Образ, который мы будем использовать
@@ -24,3 +25,16 @@ networks:
 netology-lesson:
 ipv4_address: 172.19.0.2
 restart: always # Режим перезапуска контейнера. Контейнер всегда будет перезапускаться
+
+pgadmin:
+image: dpage/pgadmin4
+container_name: netology-pgadmin
+environment:
+PGADMIN_DEFAULT_EMAIL: netology@mymail.me
+PGADMIN_DEFAULT_PASSWORD: 123
+ports:
+- "8080:80"
+networks:
+netology-lesson:
+ipv4_address: 172.19.0.3
+restart: always
