@@ -53,3 +53,21 @@ networks:
 netology-lesson:
 ipv4_address: 172.19.0.3
 restart: always
+
+4
+
+zabbix-server:
+image: zabbix/zabbix-server-pgsql
+links:
+- netology-db
+container_name: netology-zabbix
+environment:
+DB_SERVER_HOST: '172.19.0.2'
+POSTGRES_USER: postgres
+POSTGRES_PASSWORD: 123
+ports:
+- "10051:10051"
+networks:
+netology-lesson:
+ipv4_address: 172.19.0.4
+restart: always
