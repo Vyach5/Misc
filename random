@@ -71,3 +71,25 @@ networks:
 netology-lesson:
 ipv4_address: 172.19.0.4
 restart: always
+
+5
+
+zabbix_wgui:
+image: zabbix/zabbix-web-apache-pgsql
+links:
+- netology-db
+- zabbix-server
+container_name: netology_zabbix_wgui
+environment:
+DB_SERVER_HOST: '172.19.0.2'
+POSTGRES_USER: 'postgres'
+POSTGRES_PASSWORD: 123
+ZBX_SERVER_HOST: "zabbix_wgui"
+PHP_TZ: "Europe/Moscow"
+ports:
+- "80:8080"
+- "443:8443"
+networks:
+netology-lesson:
+ipv4_address: 172.19.0.5
+restart: always
