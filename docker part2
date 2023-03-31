@@ -1,1 +1,76 @@
 yml file:
+
+version: "3"
+services:
+
+    netology-db:
+        image: postgres:latest
+        container_name: netology-db
+        ports:
+            - 5432:5432
+        volumes:
+            - ./pg_data:/var/lib/postgresql/data/pgdata
+        environment:
+            POSTGRES_PASSWORD: 123
+            POSTGRES_DB: netology_db
+            PGDATA: /var/lib/postgresql/data/pgdata
+        networks:
+            netology-lesson:
+                ipv4_address: 172.19.0.2
+        restart: always
+   
+    pgadmin:
+        image: dpage/pgadmin4
+        container_name: netology-pgadmin
+        environment:
+            PGADMIN_DEFAULT_EMAIL: netology@mymail.me
+            PGADMIN_DEFAULT_PASSWORD: 123
+        ports:
+            - "8080:80"
+        networks:
+            netology-lesson:
+                ipv4_address: 172.19.0.3
+        restart: always
+    
+    zabbix-server:
+        image: zabbix/zabbix-server-pgsql
+        links:
+            - netology-db
+        container_name: netology-zabbix
+        environment:
+            DB_SERVER_HOST: '172.19.0.2'
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: 123
+        ports:
+            - "10051:10051"
+        networks:
+            netology-lesson:
+                ipv4_address: 172.19.0.4
+        restart: always
+
+    zabbix_wgui:
+        image: zabbix/zabbix-web-apache-pgsql
+        links:
+            - netology-db
+            - zabbix-server
+        container_name: netology_zabbix_wgui
+        environment:
+            DB_SERVER_HOST: '172.19.0.2'
+            POSTGRES_USER: 'postgres'
+            POSTGRES_PASSWORD: 123
+            ZBX_SERVER_HOST: "zabbix_wgui"
+            PHP_TZ: "Europe/Moscow"
+        ports:
+            - "80:8080"
+            - "443:8443"
+        networks:
+            netology-lesson:
+                ipv4_address: 172.19.0.5
+        restart: always
+
+networks:
+    netology-lesson:
+        driver: bridge
+        ipam:
+            config:
+            - subnet: 172.19.0.0/24
