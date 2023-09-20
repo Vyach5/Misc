@@ -29,3 +29,17 @@ main" | sudo tee /etc/apt/sources.list.d/elastic-7.x.list <--добавляем
 "task_max_waiting_in_queue_millis" : 0,
 "active_shards_percent_as_number" : 100.0
 }
+
+Немного настройки в /etc/elasticsearch/elasticsearch.yml:
+cluster.name: netology-logging <--меняем имя кластера
+node.name: node-1 <--меняем название ноды, если нужно
+node.roles: [ master, data, ingest ] <--какую функцию будет выполнять эта нода
+cluster.initial_master_nodes: ["node-1"] <--узлы, участвующие в голосовании по
+выбору мастера
+discovery.seed_hosts: ["ip-адрес"] <--список возможных мастеров кластера
+path.data: /var/lib/elasticsearch <-где храним данные
+path.logs: /var/log/elasticsearch <--куда пишем логи
+network.host: 0.0.0.0 <--какой ip слушает хост
+
+# systemctl restart elasticsearch
+
