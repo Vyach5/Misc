@@ -1,3 +1,5 @@
+Elasticsearch
+
 Установка:
 # apt update && apt install gnupg apt-transport-https <--зависимости
 # wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key
@@ -42,4 +44,87 @@ path.logs: /var/log/elasticsearch <--куда пишем логи
 network.host: 0.0.0.0 <--какой ip слушает хост
 
 # systemctl restart elasticsearch
+
+Kibana
+# apt install kibana <--установка
+# systemctl daemon-reload <--обновляем конфиги systemd
+# systemctl enable kibana.service <--включаем юнит
+# systemctl start kibana.service <--запускаем сервис 
+
+Настройки в /etc/kibana/kibana.yml:
+server.host: "0.0.0.0" <--открываем интерфейс в мир
+# systemctl restart kibana
+
+Logstash
+# apt install logstash <--установка
+# systemctl daemon-reload <--обновляем конфиги systemd
+# systemctl enable logstash.service <--включаем юнит
+# systemctl start logstash.service <--запускаем сервис
+
+Настроим поставку access-лога nginx в elasticsearch:
+input {
+file {
+path => "/var/log/nginx/access.log"
+start_position => "beginning"
+}
+}
+filter {
+grok {
+match => { "message" => "%{IPORHOST:remote_ip} - %{DATA:user_name}
+\[%{HTTPDATE:access_time}\] \"%{WORD:http_method} %{DATA:url}
+HTTP/%{NUMBER:http_version}\" %{NUMBER:response_code} %{NUMBER:body_sent_bytes}
+\"%{DATA:referrer}\" \"%{DATA:agent}\"" }
+}
+mutate {
+remove_field => [ "host" ]
+}
+}
+output {
+elasticsearch {
+hosts => "178.154.215.248"
+data_stream => "true"
+}
+}
+
+Filebeat
+# apt install filebeat <--установка
+# systemctl daemon-reload <--обновляем конфиги systemd
+# systemctl enable filebeat.service <--включаем юнит
+# systemctl start filebeat.service <--запускаем сервис
+
+Настроим поставку access-лога nginx в elasticsearch с помощью модуля:
+# filebeat setup --dashboards <--создает дашборды в kibana
+# filebeat modules list <--смотрим список установленных модулей
+...
+nginx
+# filebeat modules enable system nginx <--включим нужные нам модули
+Enabled system <--полезный модуль для отправки данных системы
+Enabled nginx
+меняем конфиг /etc/filebeat/filebeat.yml
+output.elasticsearch:
+hosts: ["<ip elasticsearch>:9200"]
+# systemctl restart filebeat
+И это не работает :)
+
+Попробуем написать конфиг с нуля для отправки в Logstash:
+# меняем конфиг Logstash
+input {
+beats {
+port => 5044
+}
+}
+# меняем конфиг Filebeat
+filebeat.inputs:
+- type: log
+enabled: true
+paths:
+- /var/log/nginx/access.log
+processors:
+- drop_fields: <--удаляются системные поля, которые добавил filebeat
+fields: ["beat", "input_type", "prospector", "input", "host", "agent",
+"ecs"]
+output.logstash:
+hosts: ["178.154.215.248:5044"]
+
+
 
